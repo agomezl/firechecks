@@ -22,6 +22,7 @@ executable submissionserver
   build-depends:       base >=4.8 && <4.9,
                        scotty,
                        text,
+                       http-types,
                        mtl,
                        bytestring,
                        amqp
