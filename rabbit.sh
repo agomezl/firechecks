@@ -6,6 +6,9 @@ docker rm rabbit &> /dev/null
 mkdir -p ~/.rabbit-docker/data &> /dev/null
 chmod -R 777 ~/.rabbit-docker/ &> /dev/null
 
+# Create network
+docker network create testLab
+
 # Launch the docker
 echo "Building and starting the container..."
 
@@ -15,7 +18,7 @@ case "$OSTYPE" in
         ID=$(docker run -d --hostname rabbit --name rabbit rabbitmq:3)
         ;;
     linux*)
-        ID=$(docker run -d -p 5672:5672 --hostname rabbit --name rabbit -v ~/.rabbit-docker/data:/var/lib/rabbitmq rabbitmq:3)
+        ID=$(docker run -d -p 5672:5672 --hostname rabbit --net testLab --name rabbit -v ~/.rabbit-docker/data:/var/lib/rabbitmq rabbitmq:3)
         ;;
     #bsd*)     echo "BSD" ;;
     #msys*)    echo "WINDOWS" ;;
