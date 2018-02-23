@@ -33,6 +33,7 @@ main = do
                                              queueAutoDelete = False,
                                              queueDurable    = False})
         labs
+  -- Starts scotty server
   scotty 3000 $ do
          get "/:course/:labnum" $ do
                   _course <- param "course"
@@ -43,12 +44,12 @@ main = do
                     cb   <- param "cb"
                     fl   <- param "zip"
                     liftIO $ do
-                          BS.putStrLn $ BS.concat
+                         putMsg chan (T.pack labN) (BS.concat [fl,"|",cb])
+                         BS.putStrLn $ BS.concat
                             ["[*] Got request for lab=", BS.pack _lab
                             ," to check file at url=", fl
                             ," and write response to url=",cb
                             ]
-                          putMsg chan (T.pack _course) (BS.concat [fl,"|",cb])
                   else do
                     liftIO $ putStrLn $
                                "[*] bad request: " ++ _course ++ "/" ++ _lab

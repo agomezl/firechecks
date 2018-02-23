@@ -1,9 +1,21 @@
 #!/bin/bash
 
-docker run -d \
-       -e MQ_HOST=rabbit \
+MQ_HOST=${MQ_HOST:-"rabbit"}
+COURSE_NAME=${COURSE_NAME:-"testLab"}
+LAB_NUMBER=${LAB_NUMBER:-1}
+
+# Create network
+docker network create ${COURSE_NAME}
+docker network create ${MQ_HOST}
+
+docker run -it --rm \
+       -e MQ_HOST=${MQ_HOST} \
+       -e COURSE_NAME=${COURSE_NAME} \
+       -e LAB_NUMBER=${LAB_NUMBER} \
        -p 3000:3000 \
-       --net testLab \
+       --name "submissionserver_${COURSE_NAME}" \
+       --net ${COURSE_NAME} \
+       --net ${MQ_HOST} \
        -v $(pwd)/server:/server \
        fedora \
-       server/.stack-work/dist/x86_64-linux-tinfo6/Cabal-1.22.5.0/build/submissionserver/submissionserver
+       server/submissionserver
