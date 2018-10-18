@@ -23,11 +23,11 @@ ID=$(docker run -dt \
             --name "testserver_${COURSE_NAME}" \
             testserver)
 
-
 cat <<EOF
+
 ID          = ${ID:0:7}
 MQ_HOST     = ${MQ_HOST}
 COURSE_NAME = ${COURSE_NAME}
 LAB_NUMBER  = ${LAB_NUMBER}
-Can now be started and stopped with \`docker [start|stop] submissionserver_${COURSE_NAME}\`
+Can now be started and stopped with \`docker [start|stop] testserver_${COURSE_NAME}\`
 EOF
