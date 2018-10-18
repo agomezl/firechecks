@@ -32,7 +32,7 @@ def callback(ch, method, properties, body):
     print('[*] processing file=%s with callback=%s...'%(fileUrl,callback))
     try:
         run      = test('lab%i/lab%i.sh' % (LABN,LABN), fileUrl)
-        out      = run.stdout.decode('ascii')[2:]
+        out      = run.stdout.decode('ascii')
         code     = run.exit_code
     except sh.SignalException_SIGKILL:
         out  = "The program ran out of time"
@@ -44,7 +44,7 @@ def callback(ch, method, properties, body):
     print('With output:')
     print(out)
 
-    r = requests.post(fileUrl,params={'status' : outcome},data=out)
+    r = requests.post(callback,params={'status' : outcome},data=out)
     print("Got response with code=%s from callback with content=%s'" % (r.status_code,r.text))
 
 
