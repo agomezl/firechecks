@@ -20,6 +20,7 @@ ID=$(docker run -dt \
             -e COURSE_NAME=${COURSE_NAME} \
             -e LAB_NUMBER=${LAB_NUMBER} \
             -v $(pwd)/tester:/tester \
+            -v /var/run/docker.sock:/var/run/docker.sock \
             --network ${MQ_HOST} \
             --name "testserver_${COURSE_NAME}" \
             --workdir /tester \
