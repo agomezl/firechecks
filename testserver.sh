@@ -19,9 +19,12 @@ ID=$(docker run -dt \
             -e MQ_HOST=${MQ_HOST} \
             -e COURSE_NAME=${COURSE_NAME} \
             -e LAB_NUMBER=${LAB_NUMBER} \
+            -v $(pwd)/tester:/tester \
             --network ${MQ_HOST} \
             --name "testserver_${COURSE_NAME}" \
-            testserver)
+            --workdir /tester \
+            testserver \
+            python3 tester.py)
 
 cat <<EOF
 
