@@ -3,6 +3,7 @@
 MQ_HOST=${MQ_HOST:-"rabbit"}
 COURSE_NAME=${COURSE_NAME:-"testLab"}
 LAB_NUMBER=${LAB_NUMBER:-1}
+PORT=${PORT:-3000}
 
 # Some setup
 # Some setup
@@ -16,7 +17,7 @@ ID=$(docker run -dt \
             -e MQ_HOST=${MQ_HOST} \
             -e COURSE_NAME=${COURSE_NAME} \
             -e LAB_NUMBER=${LAB_NUMBER} \
-            -p 3000:3000 \
+            -p ${PORT}:3000 \
             --name "submissionserver_${COURSE_NAME}" \
             --network ${MQ_HOST} \
             -v $(pwd)/server:/server \
