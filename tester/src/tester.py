@@ -31,7 +31,7 @@ def callback(ch, method, properties, body):
 
     print('[*] processing file=%s with callback=%s...'%(fileUrl,callback))
     try:
-        run      = test('lab%i/lab%i.sh' % (LABN,LABN), fileUrl)
+        run      = test('./lab%i.sh' % LABN, fileUrl)
         out      = run.stdout.decode('ascii')
         code     = run.exit_code
     except sh.SignalException_SIGKILL:
