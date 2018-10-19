@@ -3,6 +3,7 @@
 MQ_HOST=${MQ_HOST:-"rabbit"}
 COURSE_NAME=${COURSE_NAME:-"testLab"}
 LAB_NUMBER=${LAB_NUMBER:-1}
+BUILD_DIR=$(pwd)/tester
 
 # Create network
 docker network create ${MQ_HOST}     &> /dev/null
@@ -19,7 +20,8 @@ ID=$(docker run -dt \
             -e MQ_HOST=${MQ_HOST} \
             -e COURSE_NAME=${COURSE_NAME} \
             -e LAB_NUMBER=${LAB_NUMBER} \
-            -v $(pwd)/tester:/tester \
+            -e BUILD_DIR=${BUILD_DIR} \
+            -v ${BUILD_DIR}/src:/tester \
             -v /var/run/docker.sock:/var/run/docker.sock \
             --network ${MQ_HOST} \
             --name "testserver_${COURSE_NAME}" \
