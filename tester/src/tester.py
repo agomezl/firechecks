@@ -12,28 +12,39 @@ COURSE  = os.getenv('COURSE_NAME', 'testLab')
 LABN    = int(os.getenv('LAB_NUMBER','1'))
 
 lab_queue='%s-lab%i' % (COURSE,LABN)
+lab_file='./%s-lab%i.out' % (COURSE,LABN)
 
 def callback(ch, method, properties, body):
     test     = bash.bake(_err_to_out=True,_ok_code=range(0,256),\
-                         _timeout=120)
+                         _out=lab_file, _timeout=120)
     values   = body.decode('ascii').split('|')
     fileUrl  = values[0]
     callback = values[1]
 
+    timeout = False
+
     print('[*] processing file=%s with callback=%s...'%(fileUrl,callback))
     try:
         run      = test('./lab%i.sh' % LABN, fileUrl)
-        out      = run.stdout.decode('utf-8')
+        #out      = run.stdout.decode('utf-8')
         code     = run.exit_code
     except sh.TimeoutException:
-        out  = "The program ran out of time"
+        timeout = True
         code = 1
 
     outcome  = 'pass' if code == 0 else 'fail'
 
     print('==SUCCESS==' if code == 0 else '==FAILURE==')
     print('With output:')
-    print(out)
+
+    # Gets the output
+    with open(lab_file,'rb') as out_file:
+        out = out_file.read().decode('utf-8')
+
+        if timeout:
+            out +="\n===\n [*] The program ran out of time"
+
+        print(out)
 
     try:
         r = requests.post(callback,params={'status' : outcome},data=out.encode('utf-8'))
