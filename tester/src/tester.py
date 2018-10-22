@@ -7,24 +7,15 @@ import sh
 from sh import bash
 import requests
 
-
 MQ_HOST = os.getenv('MQ_HOST', 'localhost')
 COURSE  = os.getenv('COURSE_NAME', 'testLab')
 LABN    = int(os.getenv('LAB_NUMBER','1'))
 
-# Connect to rabbit
-connection = pika.BlockingConnection(pika.ConnectionParameters(MQ_HOST))
-channel = connection.channel()
-
-# Declare queues
-
 lab_queue='%s-lab%i' % (COURSE,LABN)
-
-channel.queue_declare(queue=lab_queue)
 
 def callback(ch, method, properties, body):
     test     = bash.bake(_err_to_out=True,_ok_code=range(0,256),\
-                         _timeout=300)
+                         _timeout=120)
     values   = body.decode('ascii').split('|')
     fileUrl  = values[0]
     callback = values[1]
@@ -32,9 +23,9 @@ def callback(ch, method, properties, body):
     print('[*] processing file=%s with callback=%s...'%(fileUrl,callback))
     try:
         run      = test('./lab%i.sh' % LABN, fileUrl)
-        out      = run.stdout.decode('ascii')
+        out      = run.stdout.decode('utf-8')
         code     = run.exit_code
-    except sh.SignalException_SIGKILL:
+    except sh.TimeoutException:
         out  = "The program ran out of time"
         code = 1
 
@@ -44,13 +35,28 @@ def callback(ch, method, properties, body):
     print('With output:')
     print(out)
 
-    r = requests.post(callback,params={'status' : outcome},data=out)
-    print("Got response with code=%s from callback with content=%s'" % (r.status_code,r.text))
+    try:
+        r = requests.post(callback,params={'status' : outcome},data=out.encode('utf-8'))
+        print("Got response with code=%s from callback with content=%s'" % (r.status_code,r.text))
+    except Exception as e:
+        print("Some error ocurred while try to send the response")
+        print(e)
 
+while True:
+    # Connect to rabbit
+    connection = pika.BlockingConnection(pika.ConnectionParameters(MQ_HOST))
+    channel = connection.channel()
+    # Declare queues
+    channel.queue_declare(queue=lab_queue)
+    channel.basic_qos(prefetch_count=1)
 
-channel.basic_consume(callback,
-                      queue=lab_queue,
-                      no_ack=True)
+    try:
 
-print(' [*] Waiting for messages. To exit press CTRL+C')
-channel.start_consuming()
+        channel.basic_consume(callback,
+                              queue=lab_queue,
+                              no_ack=True)
+        print(' [*] Waiting for messages. To exit press CTRL+C')
+        channel.start_consuming()
+    except pika.exceptions.ConnectionClosed:
+        print("Trying to re-connect")
+        connection.close()
