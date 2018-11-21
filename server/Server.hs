@@ -27,12 +27,7 @@ main = do
   putStrLn $ "with MQ server at: " ++ mqHost
   putStrLn "for labs:"
   mapM_ (\n -> putStrLn $ "  " ++ n) labs
-  conn <- openConnection mqHost "/" "guest" "guest"
-  chan <- openChannel conn
-  mapM_ (\lab -> declareQueue chan newQueue {queueName       = T.pack lab,
-                                             queueAutoDelete = False,
-                                             queueDurable    = False})
-        labs
+
   -- Starts scotty server
   scotty 3000 $ do
          get "/:course/:labnum" $ do
@@ -44,7 +39,16 @@ main = do
                     cb   <- param "cb"
                     fl   <- param "zip"
                     liftIO $ do
+                         conn <- openConnection mqHost "/" "guest" "guest"
+                         chan <- openChannel conn
+                         mapM_ (\lab -> declareQueue chan newQueue {
+                                             queueName       = T.pack lab,
+                                             queueAutoDelete = False,
+                                             queueDurable    = False})
+                             labs
                          putMsg chan (T.pack labN) (BS.concat [fl,"|",cb])
+                         closeChannel chan
+                         closeConnection conn
                          BS.putStrLn $ BS.concat
                             ["[*] Got request for lab=", BS.pack _lab
                             ," to check file at url=", fl
