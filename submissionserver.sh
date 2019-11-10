@@ -22,7 +22,7 @@ ID=$(docker run -dt \
             --network ${MQ_HOST} \
             -v $(pwd)/server:/server \
             fedora \
-            server/submissionserver)
+            /server/submissionserver)
 
 cat <<EOF
 ID          = ${ID:0:7}
