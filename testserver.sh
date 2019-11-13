@@ -10,11 +10,11 @@ docker network create ${MQ_HOST}     &> /dev/null
 
 if ! docker images | grep -q testserver
 then
-    docker build -t testserver tester/
+    docker build -t testserver tester/src
 fi
 
-docker kill testserver_${COURSE_NAME} &> /dev/null
-docker rm   testserver_${COURSE_NAME} &> /dev/null
+docker kill testserver_${CONTAINER_NAME} &> /dev/null
+docker rm   testserver_${CONTAINER_NAME} &> /dev/null
 
 ID=$(docker run -dt \
             -e MQ_HOST=${MQ_HOST} \
