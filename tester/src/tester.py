@@ -62,10 +62,9 @@ while True:
     channel.basic_qos(prefetch_count=1)
 
     try:
-
-        channel.basic_consume(callback,
-                              queue=lab_queue,
-                              no_ack=True)
+        channel.basic_consume(queue=lab_queue,
+                              auto_ack=True,
+                              on_message_callback=callback)
         print(' [*] Waiting for messages. To exit press CTRL+C')
         channel.start_consuming()
     except pika.exceptions.ConnectionClosed:
